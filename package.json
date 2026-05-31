@@ -1,0 +1,22 @@
+{
+  "name": "slooze-food-ordering",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev -w @slooze/backend\" \"npm run dev -w @slooze/frontend\"",
+    "build": "npm run build -w @slooze/shared && npm run build -w @slooze/backend && npm run build -w @slooze/frontend",
+    "test": "npm run test -w @slooze/backend && npm run test -w @slooze/frontend",
+    "db:generate": "npm run prisma:generate -w @slooze/backend",
+    "db:migrate": "npm run prisma:migrate -w @slooze/backend",
+    "db:seed": "npm run prisma:seed -w @slooze/backend",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

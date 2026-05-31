@@ -1,0 +1,18 @@
+'use client';
+
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useState } from 'react';
+import { AuthProvider } from '@/context/auth-context';
+import { ToastContextProvider } from '@/hooks/use-toast';
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  const [queryClient] = useState(() => new QueryClient());
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <ToastContextProvider>{children}</ToastContextProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+}

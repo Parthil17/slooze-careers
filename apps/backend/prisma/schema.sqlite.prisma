@@ -1,0 +1,108 @@
+// Local dev without Docker/PostgreSQL — use: npm run db:setup:sqlite
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  MEMBER
+}
+
+enum Country {
+  GLOBAL
+  INDIA
+  AMERICA
+}
+
+enum OrderStatus {
+  DRAFT
+  PLACED
+  PAID
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+model User {
+  id             String          @id @default(uuid())
+  name           String
+  email          String          @unique
+  password       String
+  role           Role
+  country        Country
+  createdAt      DateTime        @default(now())
+  orders         Order[]
+  paymentMethods PaymentMethod[]
+}
+
+model Restaurant {
+  id          String     @id @default(uuid())
+  name        String
+  description String
+  country     Country
+  createdAt   DateTime   @default(now())
+  menuItems   MenuItem[]
+}
+
+model MenuItem {
+  id           String      @id @default(uuid())
+  restaurantId String
+  name         String
+  description  String
+  price        Decimal
+  imageUrl     String?
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  orderItems   OrderItem[]
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  userId      String
+  status      OrderStatus @default(DRAFT)
+  totalAmount Decimal     @default(0)
+  country     Country
+  createdAt   DateTime    @default(now())
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items       OrderItem[]
+  payment     Payment?
+}
+
+model OrderItem {
+  id         String   @id @default(uuid())
+  orderId    String
+  menuItemId String
+  quantity   Int
+  price      Decimal
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+}
+
+model PaymentMethod {
+  id                String    @id @default(uuid())
+  userId            String
+  cardHolder        String
+  cardNumberMasked  String
+  expiryDate        String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments          Payment[]
+}
+
+model Payment {
+  id              String        @id @default(uuid())
+  orderId         String        @unique
+  paymentMethodId String
+  amount          Decimal
+  status          PaymentStatus @default(PENDING)
+  order           Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  paymentMethod   PaymentMethod @relation(fields: [paymentMethodId], references: [id])
+}
